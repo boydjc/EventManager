@@ -48,4 +48,7 @@ contents.each do |row|
   legislators = legislators_by_zipcode(zipcode)
   
   puts "#{name} #{zipcode} #{legislators}"
+
+  template_letter = File.read('../form_letter.html')
+
 end
