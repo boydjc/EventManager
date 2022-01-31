@@ -14,6 +14,30 @@ def clean_zipcode(zipcode)
   return zipcode
 end
 
+def clean_phone_numbers(phone_number)
+  # strip dashes and spaces from number
+  if phone_number.nil?
+    return '0000000000'
+  else
+    phone_number.tr!('-', '')
+	phone_number.tr!(' ', '')
+    if phone_number.length >= 10 and phone_number.length <= 11
+      if phone_number.length == 11
+	    if phone_number[0] == 1
+	      phone_number = phone_number[1..]
+		  return phone_number
+	    else
+	      phone_number = '00000000000'
+	    end
+	  elsif phone_number.length == 10
+	    return phone_number
+	  end
+    else
+      phone_number = '0000000000'
+    end
+  end
+end
+
 def legislators_by_zipcode(zipcode)
   civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
   civic_info.key = 'AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw'
@@ -56,12 +80,13 @@ contents.each do |row|
   id = row[0]
   name = row[:first_name]
   zipcode = clean_zipcode(row[:zipcode])
+  phone_number = clean_phone_numbers(row[:homephone])
 
-  legislators = legislators_by_zipcode(zipcode)
+  #legislators = legislators_by_zipcode(zipcode)
 
-  form_letter = erb_template.result(binding)
+  #form_letter = erb_template.result(binding)
   
-  save_thank_you_letter(id, form_letter)
+  #save_thank_you_letter(id, form_letter)
 end
 
 
