@@ -79,6 +79,10 @@ def get_most_popular_time(hourCount)
   return [mostPopularHour, hourSuffix]
 end
 
+def get_most_popular_wday(wdCount)
+  return mostPopularWday = wdCount.max_by{|key, value| value}[0]
+end
+
 puts "Event Manager Initialized!"
 
 contents = CSV.open('../event_attendees.csv', 
@@ -89,7 +93,7 @@ template_letter = File.read('../form_letter.erb')
 erb_template = ERB.new(template_letter)
 
 hourCount = Hash.new(0)
-
+wdCount = Hash.new(0)
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
@@ -99,6 +103,33 @@ contents.each do |row|
   regDate = row[:regdate]
 
   date = DateTime.strptime(regDate, '%m/%d/%y %H:%M') 
+ 
+  wDayStr = nil
+
+  case date.wday
+  when 0
+    wDayStr = "Sunday"
+  when 1
+    wDayStr = "Monday"
+  when 2
+    wDayStr = "Tuesday"
+  when 3
+    wDayStr = "Wednesday"
+  when 4
+    wDayStr = "Thursday"
+  when 5
+    wDayStr = "Friday"
+  when 6
+    wDayStr = "Saturday"
+  else
+    puts "Invalid Weekday Num for Weekday Str wDayStr=#{wDayStr}"
+  end
+
+  if wdCount.key?(wDayStr)
+    wdCount[wDayStr] +=1
+  else
+    wdCount[wDayStr] = 0
+  end
 
   if hourCount.key?(date.hour)
     hourCount[date.hour] += 1
@@ -113,6 +144,9 @@ contents.each do |row|
   save_thank_you_letter(id, form_letter)
 end
 
+popWDay = get_most_popular_wday(wdCount)
+puts "The most popular weekday to register is #{popWDay}."
+ 
 popHour = get_most_popular_time(hourCount)
 puts "The most popular hour to register is #{popHour[0]}:00 #{popHour[1]}"
 
