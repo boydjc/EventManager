@@ -68,6 +68,17 @@ def save_thank_you_letter(id, form_letter)
   end
 end
 
+def get_most_popular_time(hourCount)
+  # getting the max date count to see when the most popular time to sign up
+  mostPopularHour = hourCount.max_by{|key, value| value}[0]
+  hourSuffix = "AM"
+  if mostPopularHour > 12
+    hourSuffix = "PM"
+    mostPopularHour -= 12
+  end
+  return [mostPopularHour, hourSuffix]
+end
+
 puts "Event Manager Initialized!"
 
 contents = CSV.open('../event_attendees.csv', 
@@ -77,6 +88,8 @@ contents = CSV.open('../event_attendees.csv',
 template_letter = File.read('../form_letter.erb')
 erb_template = ERB.new(template_letter)
 
+hourCount = Hash.new(0)
+
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
@@ -85,16 +98,25 @@ contents.each do |row|
 
   regDate = row[:regdate]
 
-  date = DateTime.strptime(regDate, '%m/%d/%y %H:%M')
+  date = DateTime.strptime(regDate, '%m/%d/%y %H:%M') 
 
-  puts date.strftime('%m/%d/%y %H:%M')
+  if hourCount.key?(date.hour)
+    hourCount[date.hour] += 1
+  else
+    hourCount[date.hour] = 0
+  end
 
-  #legislators = legislators_by_zipcode(zipcode)
+  legislators = legislators_by_zipcode(zipcode)
 
-  #form_letter = erb_template.result(binding)
+  form_letter = erb_template.result(binding)
   
-  #save_thank_you_letter(id, form_letter)
+  save_thank_you_letter(id, form_letter)
 end
+
+popHour = get_most_popular_time(hourCount)
+puts "The most popular hour to register is #{popHour[0]}:00 #{popHour[1]}"
+
+
 
 
 
